@@ -1,0 +1,14 @@
+{
+  "name": "fsgb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Kyle Villeneuve | github.com/kyle-villeneuve",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "server:dev": "cd packages/server&& export NODE_ENV=development&& ts-node-dev  --inspect -- ./src/index.ts"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
