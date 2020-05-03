@@ -10,9 +10,12 @@ export default gql`
   }
 
   type Mutation {
-    register(username: String!, email: String!, password: String!): [Error!]
-    login(usernameOrEmail: String!, password: String!): [Error!]!
-    userUpdate(username: String): User
+    register(
+      username: String!
+      email: String!
+      password: String!
+    ): GenericResponse!
+    login(usernameOrEmail: String!, password: String!): GenericResponse!
   }
 
   type Query {

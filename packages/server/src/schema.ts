@@ -15,24 +15,19 @@ export type Scalars = {
   Upload: any;
 };
 
-
-export type IError = {
-   __typename?: 'Error';
-  field: Scalars['String'];
-  message?: Maybe<Scalars['String']>;
-};
-
-export type IQuery = {
-   __typename?: 'Query';
-  test?: Maybe<Scalars['String']>;
-  me: IUser;
+export type IUser = {
+   __typename?: 'User';
+  id: Scalars['ID'];
+  createdAt: Scalars['Date'];
+  updatedAt?: Maybe<Scalars['Date']>;
+  email: Scalars['String'];
+  username: Scalars['String'];
 };
 
 export type IMutation = {
    __typename?: 'Mutation';
-  test?: Maybe<Scalars['String']>;
-  register?: Maybe<Array<IError>>;
-  login: Array<IError>;
+  register: IGenericResponse;
+  login: IGenericResponse;
   userUpdate?: Maybe<IUser>;
 };
 
@@ -54,13 +49,22 @@ export type IMutationUserUpdateArgs = {
   username?: Maybe<Scalars['String']>;
 };
 
-export type IUser = {
-   __typename?: 'User';
-  id: Scalars['ID'];
-  createdAt: Scalars['Date'];
-  updatedAt?: Maybe<Scalars['Date']>;
-  email: Scalars['String'];
-  username: Scalars['String'];
+export type IQuery = {
+   __typename?: 'Query';
+  me: IUser;
+};
+
+
+export type IError = {
+   __typename?: 'Error';
+  field: Scalars['String'];
+  message?: Maybe<Scalars['String']>;
+};
+
+export type IGenericResponse = {
+   __typename?: 'GenericResponse';
+  ok: Scalars['Boolean'];
+  errors?: Maybe<Array<IError>>;
 };
 
 export enum ICacheControlScope {
@@ -136,12 +140,13 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type IResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']>,
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
-  Date: ResolverTypeWrapper<Scalars['Date']>,
-  Error: ResolverTypeWrapper<IError>,
-  Query: ResolverTypeWrapper<{}>,
-  Mutation: ResolverTypeWrapper<{}>,
   User: ResolverTypeWrapper<IUser>,
   ID: ResolverTypeWrapper<Scalars['ID']>,
+  Mutation: ResolverTypeWrapper<{}>,
+  Query: ResolverTypeWrapper<{}>,
+  Date: ResolverTypeWrapper<Scalars['Date']>,
+  Error: ResolverTypeWrapper<IError>,
+  GenericResponse: ResolverTypeWrapper<IGenericResponse>,
   CacheControlScope: ICacheControlScope,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
 };
@@ -150,14 +155,34 @@ export type IResolversTypes = {
 export type IResolversParentTypes = {
   String: Scalars['String'],
   Boolean: Scalars['Boolean'],
-  Date: Scalars['Date'],
-  Error: IError,
-  Query: {},
-  Mutation: {},
   User: IUser,
   ID: Scalars['ID'],
+  Mutation: {},
+  Query: {},
+  Date: Scalars['Date'],
+  Error: IError,
+  GenericResponse: IGenericResponse,
   CacheControlScope: ICacheControlScope,
   Upload: Scalars['Upload'],
+};
+
+export type IUserResolvers<ContextType = Context, ParentType extends IResolversParentTypes['User'] = IResolversParentTypes['User']> = {
+  id?: Resolver<IResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<IResolversTypes['Date'], ParentType, ContextType>,
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>,
+  email?: Resolver<IResolversTypes['String'], ParentType, ContextType>,
+  username?: Resolver<IResolversTypes['String'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+};
+
+export type IMutationResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
+  register?: Resolver<IResolversTypes['GenericResponse'], ParentType, ContextType, RequireFields<IMutationRegisterArgs, 'username' | 'email' | 'password'>>,
+  login?: Resolver<IResolversTypes['GenericResponse'], ParentType, ContextType, RequireFields<IMutationLoginArgs, 'usernameOrEmail' | 'password'>>,
+  userUpdate?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType, RequireFields<IMutationUserUpdateArgs, never>>,
+};
+
+export type IQueryResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
+  me?: Resolver<IResolversTypes['User'], ParentType, ContextType>,
 };
 
 export interface IDateScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['Date'], any> {
@@ -170,24 +195,9 @@ export type IErrorResolvers<ContextType = Context, ParentType extends IResolvers
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 };
 
-export type IQueryResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
-  test?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>,
-  me?: Resolver<IResolversTypes['User'], ParentType, ContextType>,
-};
-
-export type IMutationResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
-  test?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>,
-  register?: Resolver<Maybe<Array<IResolversTypes['Error']>>, ParentType, ContextType, RequireFields<IMutationRegisterArgs, 'username' | 'email' | 'password'>>,
-  login?: Resolver<Array<IResolversTypes['Error']>, ParentType, ContextType, RequireFields<IMutationLoginArgs, 'usernameOrEmail' | 'password'>>,
-  userUpdate?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType, RequireFields<IMutationUserUpdateArgs, never>>,
-};
-
-export type IUserResolvers<ContextType = Context, ParentType extends IResolversParentTypes['User'] = IResolversParentTypes['User']> = {
-  id?: Resolver<IResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<IResolversTypes['Date'], ParentType, ContextType>,
-  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>,
-  email?: Resolver<IResolversTypes['String'], ParentType, ContextType>,
-  username?: Resolver<IResolversTypes['String'], ParentType, ContextType>,
+export type IGenericResponseResolvers<ContextType = Context, ParentType extends IResolversParentTypes['GenericResponse'] = IResolversParentTypes['GenericResponse']> = {
+  ok?: Resolver<IResolversTypes['Boolean'], ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<IResolversTypes['Error']>>, ParentType, ContextType>,
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 };
 
@@ -196,11 +206,12 @@ export interface IUploadScalarConfig extends GraphQLScalarTypeConfig<IResolversT
 }
 
 export type IResolvers<ContextType = Context> = {
+  User?: IUserResolvers<ContextType>,
+  Mutation?: IMutationResolvers<ContextType>,
+  Query?: IQueryResolvers<ContextType>,
   Date?: GraphQLScalarType,
   Error?: IErrorResolvers<ContextType>,
-  Query?: IQueryResolvers<ContextType>,
-  Mutation?: IMutationResolvers<ContextType>,
-  User?: IUserResolvers<ContextType>,
+  GenericResponse?: IGenericResponseResolvers<ContextType>,
   Upload?: GraphQLScalarType,
 };
 

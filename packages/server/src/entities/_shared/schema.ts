@@ -8,10 +8,8 @@ export default gql`
     message: String
   }
 
-  type Query {
-    test: String
-  }
-  type Mutation {
-    test: String
+  type GenericResponse {
+    ok: Boolean!
+    errors: [Error!]
   }
 `;
