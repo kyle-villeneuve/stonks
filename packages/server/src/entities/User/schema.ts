@@ -9,6 +9,12 @@ export default gql`
     username: String!
   }
 
+  type UserResponse {
+    ok: Boolean!
+    user: User
+    errors: [Error!]
+  }
+
   type Mutation {
     register(
       username: String!
@@ -16,6 +22,7 @@ export default gql`
       password: String!
     ): GenericResponse!
     login(usernameOrEmail: String!, password: String!): GenericResponse!
+    userUpdate(username: String): UserResponse!
   }
 
   type Query {

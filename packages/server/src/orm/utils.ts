@@ -139,7 +139,7 @@ export const parseConditions = ({
     where: [],
   };
 
-  parsed.where = Object.keys(where).reduce((total, key) => {
+  parsed.where = Object.keys(where).reduce((total: string[], key) => {
     const value = where[key];
 
     // if object
@@ -172,7 +172,7 @@ export const parseConditions = ({
 
       // if key is comparator
     } else if (key.charAt(0) === "$") {
-      columns.push(parentKey);
+      if (parentKey) columns.push(parentKey);
 
       switch (key) {
         case "$GT":
@@ -250,7 +250,7 @@ export const createConditions = ({
   where = {},
   offset = 0,
 }: {
-  where: IMap;
+  where?: IMap;
   offset?: number;
 }): {
   conditions: string;
@@ -355,7 +355,7 @@ export const createReturning = (returning?: string | string[]) => {
   return `RETURNING\n\t${_returning}`;
 };
 
-export const createGroupBy = (groupBy: string | string[]) => {
+export const createGroupBy = (groupBy?: string | string[]) => {
   if (!groupBy || !groupBy.length) return "";
 
   const text = ["GROUP BY"];
@@ -365,7 +365,7 @@ export const createGroupBy = (groupBy: string | string[]) => {
   return text.join("\n");
 };
 
-export const createJoin = (join: IJoin | IJoin[]): string => {
+export const createJoin = (join?: IJoin | IJoin[]): string => {
   if (!join) return "";
 
   if (Array.isArray(join)) {

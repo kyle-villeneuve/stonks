@@ -1,7 +1,8 @@
-import { Pool, PoolClient, QueryResult } from "pg";
+import { PoolClient } from "pg";
+import { NODE_ENV } from "../config";
 import { pool, preparedStatement, query } from "./connection";
 import Model from "./Model";
-import { IModelSchema, TAction } from "./types";
+import { IModelColumn, IModelSchema, TAction } from "./types";
 import { diffObjects } from "./utils";
 
 type ICompleteSchema = { [key: string]: IModelSchema };
@@ -36,7 +37,7 @@ const onActionType: TAction = {
   d: "SET DEFAULT",
 };
 
-const getColumnType = (c: IColumnDef, constraintDef: IConstraintDef) => {
+const getColumnType = (c: IColumnDef, constraintDef?: IConstraintDef) => {
   const TYPE = c.data_type;
 
   // primary key
@@ -60,27 +61,13 @@ const getColumnType = (c: IColumnDef, constraintDef: IConstraintDef) => {
 };
 
 export default class DB<T extends { [key: string]: Model }> {
+  static pool = pool;
+  static query = query;
+  static preparedStatement = preparedStatement;
+
   models: T;
   modelKeys: (keyof T)[];
   extensions: string[];
-  pool: Pool;
-  preparedStatement: <Rows = any>(
-    {
-      text,
-      name,
-      values,
-    }: {
-      text: string;
-      name?: string;
-      values?: any[];
-    },
-    client?: PoolClient
-  ) => Promise<QueryResult<Rows>>;
-  query: <Rows = any>(
-    sql: string,
-    values?: any[],
-    client?: PoolClient
-  ) => Promise<QueryResult<Rows>>;
 
   constructor({
     models,
@@ -92,14 +79,10 @@ export default class DB<T extends { [key: string]: Model }> {
     this.models = models;
     this.modelKeys = Object.keys(this.models) as (keyof T)[];
     this.extensions = extensions;
-
-    this.pool = pool;
-    this.preparedStatement = preparedStatement;
-    this.query = query;
   }
 
   async init() {
-    if (process.env.NODE_ENV === "production") {
+    if (NODE_ENV === "production") {
       throw new Error("Cannot be run in production");
     }
 
@@ -117,21 +100,21 @@ export default class DB<T extends { [key: string]: Model }> {
        */
 
       for (const extension of this.extensions) {
-        await this.query(`CREATE EXTENSION IF NOT EXISTS ${extension}`);
+        await query(`CREATE EXTENSION IF NOT EXISTS ${extension}`);
       }
 
       /**
        * Destroy all tables
        */
       for (const sql of tableSQL) {
-        await this.query(sql.destroyTable);
+        await query(sql.destroyTable);
       }
 
       /**
        * Create tables
        */
       for (const sql of tableSQL) {
-        await this.query(sql.table);
+        await query(sql.table);
       }
 
       /**
@@ -140,7 +123,7 @@ export default class DB<T extends { [key: string]: Model }> {
       const addForeignKeys = tableSQL.flatMap((sql) => sql.foreignKeys);
 
       for (const fkDef of addForeignKeys) {
-        await this.query(fkDef);
+        await query(fkDef);
       }
 
       /**
@@ -151,7 +134,7 @@ export default class DB<T extends { [key: string]: Model }> {
       );
 
       for (const uniqueGroupDef of addGroupConstraints) {
-        await this.query(uniqueGroupDef);
+        await query(uniqueGroupDef);
       }
 
       /**
@@ -177,7 +160,7 @@ export default class DB<T extends { [key: string]: Model }> {
   }
 
   async transact<T1 = any>(callback: (client: PoolClient) => T1): Promise<T1> {
-    const client = await this.pool.connect();
+    const client = await pool.connect();
 
     try {
       await client.query("BEGIN");
@@ -284,9 +267,8 @@ export default class DB<T extends { [key: string]: Model }> {
           const uks = tableConstraints.filter((c) => c.type === "u");
 
           // COLUMNS
-          const { rows: columnsDef } = await this.preparedStatement<IColumnDef>(
-            {
-              text: `
+          const { rows: columnsDef } = await preparedStatement<IColumnDef>({
+            text: `
                 SELECT
                   column_name,
                   column_default,
@@ -301,8 +283,7 @@ export default class DB<T extends { [key: string]: Model }> {
                 WHERE
                   TABLE_NAME = '${model.tableName}';
               `,
-            }
-          );
+          });
 
           const formatted = columnsDef.reduce(
             (total: IModelSchema, c: IColumnDef) => {
@@ -325,15 +306,16 @@ export default class DB<T extends { [key: string]: Model }> {
 
               if (pkDef) {
                 total[columnName].pk = true;
-                if (type !== "SERIAL") {
+
+                if (type !== "SERIAL" && c.column_default) {
                   total[columnName].defaultValue = c.column_default;
                 }
               } else if (c.column_default !== null) {
                 total[columnName].defaultValue = c.column_default;
               }
 
-              if (fkDef) {
-                total[columnName].fk = {
+              if (fkDef && fkDef.table_references && fkDef.column_references) {
+                const fk: IModelColumn["fk"] = {
                   table: fkDef.table_references,
                   column: fkDef.column_references,
                 };
@@ -342,12 +324,14 @@ export default class DB<T extends { [key: string]: Model }> {
                 const onDelete = onActionType[fkDef.on_delete];
 
                 if (onUpdate) {
-                  total[columnName].fk.onUpdate = onUpdate;
+                  fk.onUpdate = onUpdate;
                 }
 
                 if (onDelete) {
-                  total[columnName].fk.onDelete = onDelete;
+                  fk.onDelete = onDelete;
                 }
+
+                total[columnName].fk = fk;
               }
 
               return total;

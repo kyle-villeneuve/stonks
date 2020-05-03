@@ -24,11 +24,18 @@ export type IUser = {
   username: Scalars['String'];
 };
 
+export type IUserResponse = {
+   __typename?: 'UserResponse';
+  ok: Scalars['Boolean'];
+  user?: Maybe<IUser>;
+  errors?: Maybe<Array<IError>>;
+};
+
 export type IMutation = {
    __typename?: 'Mutation';
   register: IGenericResponse;
   login: IGenericResponse;
-  userUpdate?: Maybe<IUser>;
+  userUpdate: IUserResponse;
 };
 
 
@@ -142,6 +149,7 @@ export type IResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   User: ResolverTypeWrapper<IUser>,
   ID: ResolverTypeWrapper<Scalars['ID']>,
+  UserResponse: ResolverTypeWrapper<IUserResponse>,
   Mutation: ResolverTypeWrapper<{}>,
   Query: ResolverTypeWrapper<{}>,
   Date: ResolverTypeWrapper<Scalars['Date']>,
@@ -157,6 +165,7 @@ export type IResolversParentTypes = {
   Boolean: Scalars['Boolean'],
   User: IUser,
   ID: Scalars['ID'],
+  UserResponse: IUserResponse,
   Mutation: {},
   Query: {},
   Date: Scalars['Date'],
@@ -175,10 +184,17 @@ export type IUserResolvers<ContextType = Context, ParentType extends IResolversP
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 };
 
+export type IUserResponseResolvers<ContextType = Context, ParentType extends IResolversParentTypes['UserResponse'] = IResolversParentTypes['UserResponse']> = {
+  ok?: Resolver<IResolversTypes['Boolean'], ParentType, ContextType>,
+  user?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<IResolversTypes['Error']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+};
+
 export type IMutationResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
   register?: Resolver<IResolversTypes['GenericResponse'], ParentType, ContextType, RequireFields<IMutationRegisterArgs, 'username' | 'email' | 'password'>>,
   login?: Resolver<IResolversTypes['GenericResponse'], ParentType, ContextType, RequireFields<IMutationLoginArgs, 'usernameOrEmail' | 'password'>>,
-  userUpdate?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType, RequireFields<IMutationUserUpdateArgs, never>>,
+  userUpdate?: Resolver<IResolversTypes['UserResponse'], ParentType, ContextType, RequireFields<IMutationUserUpdateArgs, never>>,
 };
 
 export type IQueryResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
@@ -207,6 +223,7 @@ export interface IUploadScalarConfig extends GraphQLScalarTypeConfig<IResolversT
 
 export type IResolvers<ContextType = Context> = {
   User?: IUserResolvers<ContextType>,
+  UserResponse?: IUserResponseResolvers<ContextType>,
   Mutation?: IMutationResolvers<ContextType>,
   Query?: IQueryResolvers<ContextType>,
   Date?: GraphQLScalarType,

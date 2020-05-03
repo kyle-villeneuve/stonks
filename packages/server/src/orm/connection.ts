@@ -1,14 +1,9 @@
 import { Pool, PoolClient } from "pg";
+import { DATABASE_URL } from "../config";
 import { hashString } from "./utils";
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("perfORM requires environment variable `DATABASE_URL`");
-}
-
 export const pool = new Pool({
-  connectionString,
+  connectionString: DATABASE_URL,
 });
 
 export const query = <Rows = any[]>(

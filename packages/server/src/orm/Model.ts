@@ -184,10 +184,10 @@ export default class Model<T = any> {
         definition.push(
           `REFERENCES "${tableReference}" ("${columnReference}")`
         );
-      }
 
-      if (fk.onUpdate) definition.push(`ON UPDATE ${fk.onUpdate}`);
-      if (fk.onDelete) definition.push(`ON DELETE ${fk.onDelete}`);
+        if (fk.onUpdate) definition.push(`ON UPDATE ${fk.onUpdate}`);
+        if (fk.onDelete) definition.push(`ON DELETE ${fk.onDelete}`);
+      }
 
       return definition.join(" ");
     });
