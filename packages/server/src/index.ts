@@ -18,6 +18,16 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context,
+  formatError: (error) => {
+    console.log(error);
+    return error;
+  },
+  playground: {
+    settings: {
+      // @ts-ignore
+      "schema.polling.enable": false,
+    },
+  },
 });
 
 const port = Number(process.env.PORT) || 3000;

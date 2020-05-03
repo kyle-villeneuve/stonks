@@ -25,12 +25,14 @@ export type IError = {
 export type IQuery = {
    __typename?: 'Query';
   test?: Maybe<Scalars['String']>;
+  me: IUser;
 };
 
 export type IMutation = {
    __typename?: 'Mutation';
   test?: Maybe<Scalars['String']>;
-  register: Scalars['Boolean'];
+  register?: Maybe<Array<IError>>;
+  login: Array<IError>;
   userUpdate?: Maybe<IUser>;
 };
 
@@ -38,6 +40,12 @@ export type IMutation = {
 export type IMutationRegisterArgs = {
   username: Scalars['String'];
   email: Scalars['String'];
+  password: Scalars['String'];
+};
+
+
+export type IMutationLoginArgs = {
+  usernameOrEmail: Scalars['String'];
   password: Scalars['String'];
 };
 
@@ -164,11 +172,13 @@ export type IErrorResolvers<ContextType = Context, ParentType extends IResolvers
 
 export type IQueryResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
   test?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>,
+  me?: Resolver<IResolversTypes['User'], ParentType, ContextType>,
 };
 
 export type IMutationResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
   test?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>,
-  register?: Resolver<IResolversTypes['Boolean'], ParentType, ContextType, RequireFields<IMutationRegisterArgs, 'username' | 'email' | 'password'>>,
+  register?: Resolver<Maybe<Array<IResolversTypes['Error']>>, ParentType, ContextType, RequireFields<IMutationRegisterArgs, 'username' | 'email' | 'password'>>,
+  login?: Resolver<Array<IResolversTypes['Error']>, ParentType, ContextType, RequireFields<IMutationLoginArgs, 'usernameOrEmail' | 'password'>>,
   userUpdate?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType, RequireFields<IMutationUserUpdateArgs, never>>,
 };
 

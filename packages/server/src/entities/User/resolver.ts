@@ -1,5 +1,6 @@
 import db from "../../db";
 import { IMutationResolvers } from "../../schema";
+import { sign } from "jsonwebtoken";
 
 interface IResolverMap {
   Mutation: {
@@ -10,15 +11,41 @@ interface IResolverMap {
 const resolverMap: IResolverMap = {
   Mutation: {
     register: async (_p, args, { res }) => {
-      const user = await db.models.User.create({ data: args, returning: "*" });
-      console.log({ args, user });
+      // try {
+      const { id, username, password } = await db.models.User.create({
+        data: args,
+        returning: "id, username, password",
+      });
 
-      if (user) {
-        res.setHeader("X-Token", "test");
-        res.setHeader("X-Refresh-Token", "refreshToken");
-      }
+      const tokenPromise = sign(
+        {
+          id,
+          username,
+        },
+        process.env.TOKEN_SECRET as string,
+        {
+          expiresIn: "15m",
+        }
+      );
 
-      return true;
+      const refreshTokenPromise = sign(
+        { id },
+        process.env.REFRESH_SECRET + password,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      const [token, refreshToken] = await Promise.all([
+        tokenPromise,
+        refreshTokenPromise,
+      ]);
+
+      res.setHeader("X-Token", token);
+      res.setHeader("X-Refresh-Token", refreshToken);
+      // } catch (err) {
+      //   return [];
+      // }
     },
   },
 };
