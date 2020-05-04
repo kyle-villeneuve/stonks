@@ -5,8 +5,8 @@ import { refreshTokens } from "../entities/User/controller";
 
 export interface Context {
   user: {
-    id?: string;
-    username?: string;
+    id: string | null;
+    username: string | null;
   };
   res: Response;
 }
@@ -18,27 +18,43 @@ export default async ({
   req: Request;
   res: Response;
 }): Promise<Context> => {
+  // get the auth tokens from headers
   const token = req.headers["x-token"] as string;
   const refreshToken = req.headers["x-refresh-token"] as string;
 
+  // define base context (regardless of auth status)
   const context: Context = {
     res,
-    user: {},
+    user: {
+      id: null,
+      username: null,
+    },
   };
 
-  if (!token) return context;
-
+  // attempt to include user to context
   try {
-    context.user = verify(token, TOKEN_SECRET) as Context["user"];
+    if (token) {
+      context.user = verify(token, TOKEN_SECRET) as Context["user"];
+    }
   } catch (_error) {}
 
+  // if the auth token is invalid
+  // try to issue new tokens
   if (!context.user && refreshToken) {
-    const [user, newToken, newRefreshToken] = await refreshTokens(refreshToken);
+    const refreshedTokenData = await refreshTokens(refreshToken);
 
+    // if unable to issue new tokens, return base context
+    if (!refreshedTokenData) return context;
+
+    // if we were able to issue new tokens
+    const [user, newToken, newRefreshToken] = refreshedTokenData;
+
+    // pass user to context
     context.user = user;
 
-    newToken && res.setHeader("X-Token", newToken);
-    newRefreshToken && res.setHeader("X-Refresh-Token", newRefreshToken);
+    // set headers containg new auth tokens
+    res.setHeader("X-Token", newToken);
+    res.setHeader("X-Refresh-Token", newRefreshToken);
   }
 
   return context;

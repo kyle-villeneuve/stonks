@@ -21,11 +21,7 @@ export const createTokens = ({
   return Promise.all([tokenPromise, refreshTokenPromise]);
 };
 
-type RefreshedTokenData = [
-  Context["user"] | null,
-  string | null,
-  string | null
-];
+type RefreshedTokenData = [Context["user"], string, string] | null;
 
 export const refreshTokens = async (
   refreshToken: string
@@ -33,31 +29,36 @@ export const refreshTokens = async (
   let user = null;
 
   try {
+    // decode (not verify) the refreshToken
     const decoded = decode(refreshToken) as {
       id: number;
       iat: number;
       exp: number;
     };
 
+    // ensure the user still exists
     const _user = await db.models.User.findById({
       id: decoded.id,
       select: "id, username, password",
     });
 
-    if (!_user) return [null, null, null];
+    // user no longer exists
+    if (!_user) return null;
 
+    // new that we have the password, we can check if the refreshToken is valid
     await verify(refreshToken, `${REFRESH_SECRET}${_user.password}`);
 
+    // issue new tokens
     const [newToken, newRefreshToken] = await createTokens(_user);
 
-    // if refresh token is valid, pass user to context
+    // pass user to context
     user = {
       id: _user.id.toString(),
       username: _user.username,
     };
 
     return [user, newToken, newRefreshToken];
-  } catch (_error) {
-    return [null, null, null];
-  }
+  } catch (_error) {}
+
+  return null;
 };
