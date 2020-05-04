@@ -21,6 +21,7 @@ const PORT = Number(getVar("PORT", "3000"));
 const NODE_ENV = getVar("NODE_ENV");
 const ADMIN_LIST = JSON.parse(getVar("ADMIN_LIST", "[]"));
 const DATABASE_URL = getVar("DATABASE_URL");
+const SUPER_USER_ID = getVar("SUPER_USER_ID");
 
 export {
   TOKEN_SECRET,
@@ -29,4 +30,5 @@ export {
   NODE_ENV,
   ADMIN_LIST,
   DATABASE_URL,
+  SUPER_USER_ID,
 };

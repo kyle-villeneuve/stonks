@@ -1,6 +1,7 @@
 import { gql } from "apollo-server";
 
 export default gql`
+  scalar Any
   scalar Date
 
   type Error {

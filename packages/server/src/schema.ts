@@ -9,10 +9,37 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Any: any;
   /** Date custom scalar type */
   Date: Date;
   /** The `Upload` scalar type represents a file upload. */
   Upload: any;
+};
+
+export type IDbDiffChange = {
+   __typename?: 'DBDiffChange';
+  path: Array<Scalars['Any']>;
+  actual?: Maybe<Scalars['String']>;
+  definition?: Maybe<Scalars['String']>;
+};
+
+export type IDbDiff = {
+   __typename?: 'DBDiff';
+  add: Array<Maybe<IDbDiffChange>>;
+  update: Array<Maybe<IDbDiffChange>>;
+  remove: Array<Maybe<IDbDiffChange>>;
+};
+
+export type IDbSchema = {
+   __typename?: 'DBSchema';
+  diff: IDbDiff;
+  actual: Scalars['String'];
+};
+
+export type IQuery = {
+   __typename?: 'Query';
+  schema: IDbSchema;
+  me: IUser;
 };
 
 export type IUser = {
@@ -56,10 +83,6 @@ export type IMutationUserUpdateArgs = {
   username?: Maybe<Scalars['String']>;
 };
 
-export type IQuery = {
-   __typename?: 'Query';
-  me: IUser;
-};
 
 
 export type IError = {
@@ -147,11 +170,15 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type IResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']>,
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
+  DBDiffChange: ResolverTypeWrapper<IDbDiffChange>,
+  DBDiff: ResolverTypeWrapper<IDbDiff>,
+  DBSchema: ResolverTypeWrapper<IDbSchema>,
+  Query: ResolverTypeWrapper<{}>,
   User: ResolverTypeWrapper<IUser>,
   ID: ResolverTypeWrapper<Scalars['ID']>,
   UserResponse: ResolverTypeWrapper<IUserResponse>,
   Mutation: ResolverTypeWrapper<{}>,
-  Query: ResolverTypeWrapper<{}>,
+  Any: ResolverTypeWrapper<Scalars['Any']>,
   Date: ResolverTypeWrapper<Scalars['Date']>,
   Error: ResolverTypeWrapper<IError>,
   GenericResponse: ResolverTypeWrapper<IGenericResponse>,
@@ -163,16 +190,45 @@ export type IResolversTypes = {
 export type IResolversParentTypes = {
   String: Scalars['String'],
   Boolean: Scalars['Boolean'],
+  DBDiffChange: IDbDiffChange,
+  DBDiff: IDbDiff,
+  DBSchema: IDbSchema,
+  Query: {},
   User: IUser,
   ID: Scalars['ID'],
   UserResponse: IUserResponse,
   Mutation: {},
-  Query: {},
+  Any: Scalars['Any'],
   Date: Scalars['Date'],
   Error: IError,
   GenericResponse: IGenericResponse,
   CacheControlScope: ICacheControlScope,
   Upload: Scalars['Upload'],
+};
+
+export type IDbDiffChangeResolvers<ContextType = Context, ParentType extends IResolversParentTypes['DBDiffChange'] = IResolversParentTypes['DBDiffChange']> = {
+  path?: Resolver<Array<IResolversTypes['Any']>, ParentType, ContextType>,
+  actual?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>,
+  definition?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+};
+
+export type IDbDiffResolvers<ContextType = Context, ParentType extends IResolversParentTypes['DBDiff'] = IResolversParentTypes['DBDiff']> = {
+  add?: Resolver<Array<Maybe<IResolversTypes['DBDiffChange']>>, ParentType, ContextType>,
+  update?: Resolver<Array<Maybe<IResolversTypes['DBDiffChange']>>, ParentType, ContextType>,
+  remove?: Resolver<Array<Maybe<IResolversTypes['DBDiffChange']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+};
+
+export type IDbSchemaResolvers<ContextType = Context, ParentType extends IResolversParentTypes['DBSchema'] = IResolversParentTypes['DBSchema']> = {
+  diff?: Resolver<IResolversTypes['DBDiff'], ParentType, ContextType>,
+  actual?: Resolver<IResolversTypes['String'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+};
+
+export type IQueryResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
+  schema?: Resolver<IResolversTypes['DBSchema'], ParentType, ContextType>,
+  me?: Resolver<IResolversTypes['User'], ParentType, ContextType>,
 };
 
 export type IUserResolvers<ContextType = Context, ParentType extends IResolversParentTypes['User'] = IResolversParentTypes['User']> = {
@@ -197,9 +253,9 @@ export type IMutationResolvers<ContextType = Context, ParentType extends IResolv
   userUpdate?: Resolver<IResolversTypes['UserResponse'], ParentType, ContextType, RequireFields<IMutationUserUpdateArgs, never>>,
 };
 
-export type IQueryResolvers<ContextType = Context, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
-  me?: Resolver<IResolversTypes['User'], ParentType, ContextType>,
-};
+export interface IAnyScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['Any'], any> {
+  name: 'Any'
+}
 
 export interface IDateScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['Date'], any> {
   name: 'Date'
@@ -222,10 +278,14 @@ export interface IUploadScalarConfig extends GraphQLScalarTypeConfig<IResolversT
 }
 
 export type IResolvers<ContextType = Context> = {
+  DBDiffChange?: IDbDiffChangeResolvers<ContextType>,
+  DBDiff?: IDbDiffResolvers<ContextType>,
+  DBSchema?: IDbSchemaResolvers<ContextType>,
+  Query?: IQueryResolvers<ContextType>,
   User?: IUserResolvers<ContextType>,
   UserResponse?: IUserResponseResolvers<ContextType>,
   Mutation?: IMutationResolvers<ContextType>,
-  Query?: IQueryResolvers<ContextType>,
+  Any?: GraphQLScalarType,
   Date?: GraphQLScalarType,
   Error?: IErrorResolvers<ContextType>,
   GenericResponse?: IGenericResponseResolvers<ContextType>,

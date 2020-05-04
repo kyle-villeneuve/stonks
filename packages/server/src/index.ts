@@ -2,6 +2,7 @@ import { ApolloServer, ServerInfo } from "apollo-server";
 import { fileLoader, mergeResolvers, mergeTypes } from "merge-graphql-schemas";
 import { join } from "path";
 import { NODE_ENV, PORT } from "./config";
+import db from "./db";
 import context from "./middleware";
 
 const resolvers = mergeResolvers(
@@ -28,5 +29,6 @@ const server = new ApolloServer({
 });
 
 server.listen(PORT).then(({ url }: ServerInfo) => {
+  db.init();
   console.log("\n", `🚀 Server running in ${NODE_ENV} mode at ${url}`);
 });
