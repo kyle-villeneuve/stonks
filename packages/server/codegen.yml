@@ -4,8 +4,6 @@ documents: null
 generates:
   src/schema.ts:
     config:
-      config:
-        defaultMapper: Partial<{T}>
       namingConvention:
         enumValues: change-case#upperCase
       noSchemaStitching: true
