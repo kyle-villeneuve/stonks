@@ -10,5 +10,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "tslint": "^6.1.2"
+  }
 }

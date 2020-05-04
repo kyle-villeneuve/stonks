@@ -17,7 +17,6 @@ const server = new ApolloServer({
   resolvers,
   context,
   formatError: (error) => {
-    console.log(error);
     return error;
   },
   playground: {

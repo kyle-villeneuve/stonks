@@ -1,7 +1,7 @@
 import { compare, hash } from "bcrypt";
 import db from "../../db";
 import restrict from "../../middleware/_restrict";
-import { IMutationResolvers } from "../../schema";
+import { IMutationResolvers, IQueryResolvers } from "../../schema";
 import { formatErrors } from "../../utils";
 import { createTokens } from "./controller";
 
@@ -10,6 +10,9 @@ interface IResolverMap {
     register: IMutationResolvers["register"];
     login: IMutationResolvers["login"];
     userUpdate: IMutationResolvers["userUpdate"];
+  };
+  Query: {
+    me: IQueryResolvers["me"];
   };
 }
 
@@ -118,7 +121,10 @@ const resolverMap: IResolverMap = {
 
         return {
           ok: true,
-          user,
+          user: {
+            ...user,
+            id: user.id.toString(),
+          },
         };
       } catch (err) {
         return {
@@ -126,6 +132,16 @@ const resolverMap: IResolverMap = {
           errors: formatErrors(err),
         };
       }
+    }),
+  },
+  Query: {
+    me: restrict("LOGGED_IN", async (_p, _a, { user: { id } }) => {
+      const user = await db.models.User.findById(id.toString());
+
+      return {
+        ...user,
+        id: user.id.toString(),
+      };
     }),
   },
 };
