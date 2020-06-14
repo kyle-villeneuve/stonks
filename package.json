@@ -6,7 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "server:dev": "cd packages/server&& export NODE_ENV=development&& ts-node-dev  --inspect -- ./src/index.ts"
+    "server:dev": "cd packages/server&& export NODE_ENV=development&& ts-node-dev  --inspect -- ./src/index.ts",
+    "client:dev": "cd packages/client&& export NODE_ENV=development&& yarn start"
   },
   "workspaces": [
     "packages/*"

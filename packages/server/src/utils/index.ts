@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { IError } from "../schema";
 
 export const formatErrors = (error: any | any[]): IError[] => {
@@ -31,4 +32,8 @@ export const formatErrors = (error: any | any[]): IError[] => {
       }
     }
   }, []);
+};
+
+export const hash = (key: string) => {
+  return createHash("md5").update(key).digest("hex");
 };
