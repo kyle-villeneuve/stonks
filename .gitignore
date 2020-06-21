@@ -3,5 +3,5 @@ dist
 .env
 .DS_Store
 
-file-cache/*
-\!file-cache/.gitkeep
+packages/server/file-cache
+\!packages/server/file-cache/.gitkeep

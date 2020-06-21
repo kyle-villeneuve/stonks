@@ -161,10 +161,9 @@ export const getDocument = fsMemo(
 );
 
 export const getXML = fsMemo(
-  async (url: string): Promise<Object> => {
+  async (url: string): Promise<any> => {
     const response = await fetch(url);
 
-    //  get html response
     const xml = await response.text();
 
     return xml2js(xml, { compact: true });

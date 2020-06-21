@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync, readFile, writeFile } from "fs";
 import { join } from "path";
-import { hash } from ".";
 
 export function fsMemo<F extends (...args: any[]) => any>(fn: F): F {
   const rootDirectory = process.cwd();
@@ -11,7 +10,7 @@ export function fsMemo<F extends (...args: any[]) => any>(fn: F): F {
   }
 
   return <F>async function (...args: any[]) {
-    const hashed = hash(JSON.stringify(args));
+    const hashed = encodeURIComponent(args.join(":"));
     const pathname = join(folderPath, `/${hashed}.json`);
 
     let file: string | null = await new Promise((resolve) => {

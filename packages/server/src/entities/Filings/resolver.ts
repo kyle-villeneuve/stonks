@@ -1,5 +1,6 @@
 import { IQueryResolvers } from "../../schema";
 import { getDocument, getXML, querySelector } from "../../utils/dom";
+import { parseFilingReport } from "./utils";
 
 interface IResolverMap {
   //   Mutation: {};
@@ -17,8 +18,6 @@ const resolverMap: IResolverMap = {
       const all10Qs = await getDocument(
         `${baseURL}/cgi-bin/browse-edgar?action=getcompany&CIK=${ticker}&type=10-q&dateb=&owner=exclude&count=1`
       );
-
-      console.log(typeof all10Qs);
 
       // get link to filing overview
       const latest10QLink = querySelector(all10Qs)("#documentsbutton");
@@ -45,11 +44,18 @@ const resolverMap: IResolverMap = {
         .slice(0, -1)
         .join("/");
 
-      const filingSummary = `${filingIndex}/FilingSummary.xml`;
+      const filingSummaryURL = `${filingIndex}/FilingSummary.xml`;
 
       //   const document = await getDocument(filing);
 
-      return getXML(filingSummary);
+      const filingSummary = await getXML(filingSummaryURL);
+
+      const documents = parseFilingReport(
+        filingSummary?.FilingSummary?.MyReports?.Report,
+        filingIndex
+      );
+
+      return documents;
     },
   },
 };
