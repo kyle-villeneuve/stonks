@@ -1,8 +1,8 @@
-import { existsSync, mkdirSync, readFile, writeFile } from "fs";
 // @ts-ignore
 import { html2json as parseHTML } from "html2json";
 import fetch from "node-fetch";
-import { hash } from ".";
+import { xml2js } from "xml-js";
+import { fsMemo } from "./fsMemo";
 
 interface ParsedQuery {
   id?: string;
@@ -79,7 +79,7 @@ const recursiveQuery = (
   return null;
 };
 
-const querySelector = (node: HtmlNode | null) => (selector: string) => {
+export const querySelector = (node: HtmlNode | null) => (selector: string) => {
   if (!node) return null;
 
   const selectors = parseQuerySelector(selector);
@@ -125,7 +125,9 @@ const recursiveQueryAll = (
   return all;
 };
 
-const querySelectorAll = (node: HtmlNode | null) => (selector: string) => {
+export const querySelectorAll = (node: HtmlNode | null) => (
+  selector: string
+) => {
   if (!node) return null;
 
   const selectors = parseQuerySelector(selector);
@@ -143,43 +145,28 @@ const querySelectorAll = (node: HtmlNode | null) => (selector: string) => {
   return currentNodeList;
 };
 
-const getDocument = async (url: string): Promise<HtmlNode> => {
-  if (!existsSync("./file-cache")) {
-    mkdirSync("./file-cache");
+export const getDocument = fsMemo(
+  async (url: string): Promise<HtmlNode> => {
+    const response = await fetch(url);
+
+    //  get html response
+    const html = await response.text();
+
+    const removeExtraneous = html
+      .replace(/<!DOCTYPE.*>\n?/gim, "")
+      .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gm, "");
+
+    return parseHTML(removeExtraneous);
   }
+);
 
-  const fileName = `./file-cache/${hash(url)}.json`;
+export const getXML = fsMemo(
+  async (url: string): Promise<Object> => {
+    const response = await fetch(url);
 
-  let file: HtmlNode | null = await new Promise((resolve) => {
-    readFile(fileName, (err, file) => {
-      if (err) return resolve(null);
+    //  get html response
+    const xml = await response.text();
 
-      const string = file.toString("utf-8");
-
-      return resolve(JSON.parse(string));
-    });
-  });
-
-  if (file) {
-    return file;
+    return xml2js(xml, { compact: true });
   }
-
-  const response = await fetch(url);
-
-  //  get html response
-  const html = await response.text();
-
-  const removeExtraneous = html
-    .replace(/<!DOCTYPE.*>\n?/gim, "")
-    .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gm, "");
-
-  const parsed = parseHTML(removeExtraneous);
-
-  writeFile(fileName, JSON.stringify(parsed), (err) => {
-    if (err) throw err;
-  });
-
-  return parsed;
-};
-
-export { getDocument, querySelector, querySelectorAll };
+);

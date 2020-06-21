@@ -1,5 +1,5 @@
 import { IQueryResolvers } from "../../schema";
-import { getDocument, querySelector } from "../../utils/dom";
+import { getDocument, getXML, querySelector } from "../../utils/dom";
 
 interface IResolverMap {
   //   Mutation: {};
@@ -18,6 +18,8 @@ const resolverMap: IResolverMap = {
         `${baseURL}/cgi-bin/browse-edgar?action=getcompany&CIK=${ticker}&type=10-q&dateb=&owner=exclude&count=1`
       );
 
+      console.log(typeof all10Qs);
+
       // get link to filing overview
       const latest10QLink = querySelector(all10Qs)("#documentsbutton");
 
@@ -33,9 +35,21 @@ const resolverMap: IResolverMap = {
 
       const filingLink = querySelector(filingTable)("tr a");
 
-      const filing = `${baseURL}${filingLink?.attr?.href}`;
+      // link to the 10-Q
+      const filingURL = `${baseURL}${filingLink?.attr?.href}`;
 
-      return getDocument(filing);
+      // directory of filing with all tables
+      const filingIndex = filingURL
+        .replace("ix?doc=/", "")
+        .split("/")
+        .slice(0, -1)
+        .join("/");
+
+      const filingSummary = `${filingIndex}/FilingSummary.xml`;
+
+      //   const document = await getDocument(filing);
+
+      return getXML(filingSummary);
     },
   },
 };

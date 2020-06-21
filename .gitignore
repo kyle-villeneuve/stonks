@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 .DS_Store
+
+file-cache/*
+\!file-cache/.gitkeep
