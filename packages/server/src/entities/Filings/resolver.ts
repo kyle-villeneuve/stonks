@@ -1,6 +1,6 @@
 import { IQueryResolvers } from "../../schema";
 import { getDocument, getXML, querySelector } from "../../utils/dom";
-import { parseFilingReport } from "./utils";
+import { parseFilingSummary } from "./utils";
 
 interface IResolverMap {
   //   Mutation: {};
@@ -41,16 +41,14 @@ const resolverMap: IResolverMap = {
       const filingIndex = filingURL
         .replace("ix?doc=/", "")
         .split("/")
-        .slice(0, -1)
+        .slice(0, -1) // remove path going to 10-k complete filing
         .join("/");
 
       const filingSummaryURL = `${filingIndex}/FilingSummary.xml`;
 
-      //   const document = await getDocument(filing);
-
       const filingSummary = await getXML(filingSummaryURL);
 
-      const documents = parseFilingReport(
+      const documents = parseFilingSummary(
         filingSummary?.FilingSummary?.MyReports?.Report,
         filingIndex
       );

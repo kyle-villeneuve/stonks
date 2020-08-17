@@ -30,7 +30,7 @@ export function getFilingType(name: string): string | null {
   return null;
 }
 
-export function parseFilingReport(report: any, baseURL: string) {
+export function parseFilingSummary(report: any, baseURL: string) {
   return report.reduce((total: any, report: any) => {
     const name = report.LongName?._text.toLowerCase();
     const document = `${baseURL}/${report.HtmlFileName?._text}`;
